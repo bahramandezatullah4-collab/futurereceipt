@@ -1,32 +1,28 @@
-kind = "api"
-previewPath = "/api" # TODO - should be excluded from preview in the first place
-title = "API Server"
+kind = "web"
+previewPath = "/"
+title = "FUTURERECEİPT Digital Receipts"
+description = "A digital receipt platform for shoppers and small businesses around the world, with customer QR identities, merchant POS receipts, spending insights, and paper-saving impact tracking. Receipt amounts currently display in USD, and merchants configure one U.S. sales-tax rate per store."
 version = "1.0.0"
-id = "3B4_FFSkEVBkAeYMFRJ2e"
+id = "artifacts/ecobill"
+router = "path"
 
 [[services]]
-localPort = 8080
-name = "API Server"
-paths = ["/api"]
+name = "web"
+paths = [ "/" ]
+localPort = 23866
 
 [services.development]
-run = "pnpm --filter @workspace/api-server run dev"
+run = "pnpm --filter @workspace/ecobill run dev"
 
 [services.production]
+build = [ "pnpm", "--filter", "@workspace/ecobill", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ecobill/dist/public"
 
-[services.production.build]
-args = ["pnpm", "--filter", "@workspace/api-server", "run", "build"]
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
 
-[services.production.build.env]
-NODE_ENV = "production"
-
-[services.production.run]
-# we don't run through pnpm to make startup faster in production
-args = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
-
-[services.production.run.env]
-PORT = "8080"
-NODE_ENV = "production"
-
-[services.production.health.startup]
-path = "/api/healthz"
+[services.env]
+PORT = "23866"
+BASE_PATH = "/"

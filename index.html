@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>FUTURERECEİPT Digital Receipts</title>
+    <meta name="description" content="Digital receipts and spending insights for shoppers and businesses worldwide. Values are shown in USD; merchant tax uses a manually entered U.S. sales-tax rate." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="FUTURERECEİPT Digital Receipts" />
+    <meta property="og:description" content="Digital receipts and spending insights for shoppers and businesses worldwide. Values are shown in USD; merchant tax uses a manually entered U.S. sales-tax rate." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FUTURERECEİPT Digital Receipts" />
+    <meta name="twitter:description" content="Digital receipts and spending insights for shoppers and businesses worldwide. Values are shown in USD; merchant tax uses a manually entered U.S. sales-tax rate." />
+    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon-fr.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon-fr.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-fr.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      (() => {
+        if (new URLSearchParams(window.location.search).get('debugBoot') !== '1') return;
+
+        const report = (value) => {
+          const detail = String(value || 'No JavaScript error message was available.')
+            .replace(/\b(?:pk|sk)_(?:test|live)_[A-Za-z0-9_-]+\b/gi, '[redacted key]')
+            .replace(/\b(?:sess|user|clt|org)_[A-Za-z0-9_-]+\b/gi, '[redacted id]')
+            .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted email]')
+            .replace(/https?:\/\/\S+/gi, '[redacted URL]')
+            .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[redacted token]')
+            .slice(0, 220);
+
+          window.setTimeout(() => {
+            const root = document.getElementById('root');
+            if (!root || root.childElementCount > 0) return;
+
+            const main = document.createElement('main');
+            main.setAttribute('role', 'alert');
+            main.style.cssText = 'box-sizing:border-box;min-height:100dvh;display:grid;place-items:center;padding:24px;background:#eeeadf;font:16px system-ui,sans-serif;color:#202820';
+            const section = document.createElement('section');
+            section.style.cssText = 'box-sizing:border-box;width:min(100%,520px);padding:28px;border:1px solid #d8d3c8;border-radius:24px;background:#fff;text-align:center;box-shadow:0 16px 40px #00000012';
+            const title = document.createElement('h1');
+            title.textContent = 'FUTURERECEİPT could not start';
+            title.style.cssText = 'margin:0;font-size:22px';
+            const description = document.createElement('p');
+            description.textContent = 'Open Technical details below and share the short message.';
+            description.style.cssText = 'margin:12px 0;color:#606760;font-size:14px;line-height:1.5';
+            const details = document.createElement('details');
+            details.style.cssText = 'margin-top:20px;text-align:left';
+            const summary = document.createElement('summary');
+            summary.textContent = 'Technical details';
+            summary.style.cssText = 'cursor:pointer;font-size:13px;font-weight:600;text-decoration:underline';
+            const pre = document.createElement('pre');
+            pre.textContent = detail;
+            pre.style.cssText = 'max-height:180px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;border-radius:12px;background:#f1f0ec;font-size:12px';
+            details.append(summary, pre);
+            section.append(title, description, details);
+            main.append(section);
+            root.replaceChildren(main);
+          }, 0);
+        };
+
+        window.addEventListener('error', (event) => {
+          const error = event.error;
+          report(error instanceof Error ? `${error.name}: ${error.message}` : event.message);
+        });
+        window.addEventListener('unhandledrejection', (event) => {
+          const reason = event.reason;
+          report(reason instanceof Error ? `${reason.name}: ${reason.message}` : typeof reason === 'string' ? reason : 'Unhandled promise rejection');
+        });
+        window.setTimeout(() => {
+          const root = document.getElementById('root');
+          if (root && root.childElementCount === 0) report('The React app did not mount within 8 seconds.');
+        }, 8000);
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
