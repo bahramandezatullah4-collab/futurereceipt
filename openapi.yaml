@@ -1,0 +1,584 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: profiles
+    description: Customer and merchant profiles
+  - name: receipts
+    description: Digital receipts
+  - name: analytics
+    description: Spending and impact summaries
+  - name: activity
+    description: Eco-streak activity
+  - name: beta
+    description: Beta session tracking
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profiles]
+      summary: Get the current profile
+      responses:
+        "200":
+          description: Current profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    post:
+      operationId: saveProfile
+      tags: [profiles]
+      summary: Create or update the current profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "200":
+          description: Saved profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+  /account:
+    delete:
+      operationId: deleteAccount
+      tags: [profiles]
+      summary: Delete the current user's account and personal data
+      responses:
+        "200":
+          description: Account deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionResult"
+  /beta/session:
+    post:
+      operationId: recordBetaSession
+      tags: [beta]
+      summary: Record the current authenticated app session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BetaSessionInput"
+      responses:
+        "200":
+          description: Updated beta survey eligibility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BetaSurveyStatus"
+  /beta/status:
+    get:
+      operationId: getBetaStatus
+      tags: [beta]
+      summary: Get current beta survey eligibility
+      responses:
+        "200":
+          description: Current beta survey eligibility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BetaSurveyStatus"
+  /beta/feedback:
+    post:
+      operationId: createBetaFeedback
+      tags: [beta]
+      deprecated: true
+      summary: Feedback submissions are disabled
+      responses:
+        "410":
+          description: Feedback submissions are disabled. Send questions by email.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BetaFeedbackUnavailableResponse"
+  /beta/screenshot-upload-url:
+    post:
+      operationId: requestBetaScreenshotUpload
+      tags: [beta]
+      deprecated: true
+      summary: Feedback screenshot uploads are disabled
+      responses:
+        "410":
+          description: Feedback screenshot uploads are disabled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BetaFeedbackUnavailableResponse"
+  /beta/survey:
+    post:
+      operationId: submitBetaSurvey
+      tags: [beta]
+      deprecated: true
+      summary: Beta survey submissions are disabled
+      responses:
+        "410":
+          description: Beta survey submissions are disabled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BetaFeedbackUnavailableResponse"
+  /receipts:
+    get:
+      operationId: listReceipts
+      tags: [receipts]
+      summary: List current user's receipts
+      responses:
+        "200":
+          description: Digital receipts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Receipt"
+    post:
+      operationId: createReceipt
+      tags: [receipts]
+      summary: Create a digital receipt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReceiptInput"
+      responses:
+        "201":
+          description: Created receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+  /receipts/{id}:
+    get:
+      operationId: getReceipt
+      tags: [receipts]
+      summary: Get a receipt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Digital receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+        "404":
+          description: Receipt not found
+    delete:
+      operationId: deleteReceipt
+      tags: [receipts]
+      summary: Remove a receipt from the current user's records
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Receipt removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionResult"
+        "404":
+          description: Receipt not found
+  /receipts/claim:
+    post:
+      operationId: claimReceipt
+      tags: [receipts]
+      summary: Claim a receipt by scanning its POS QR code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReceiptClaimInput"
+      responses:
+        "200":
+          description: Claimed digital receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+        "404":
+          description: Receipt code not found
+  /analytics/summary:
+    get:
+      operationId: getAnalyticsSummary
+      tags: [analytics]
+      summary: Get customer spending analytics
+      responses:
+        "200":
+          description: Customer analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsSummary"
+  /analytics/merchant:
+    get:
+      operationId: getMerchantOverview
+      tags: [analytics]
+      summary: Get merchant POS overview
+      responses:
+        "200":
+          description: Merchant overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantOverview"
+  /impact:
+    get:
+      operationId: getImpactSummary
+      tags: [analytics]
+      summary: Get paper and tree savings
+      responses:
+        "200":
+          description: Environmental impact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImpactSummary"
+  /activity/check-in:
+    post:
+      operationId: checkInEcoStreak
+      tags: [activity]
+      summary: Check in for today's eco-streak activity
+      responses:
+        "200":
+          description: Current eco-streak status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EcoStreakStatus"
+components:
+  schemas:
+    BetaSurveyStatus:
+      type: object
+      required: [eligible, sessionCount, hasReceipts]
+      properties:
+        eligible: { type: boolean }
+        sessionCount: { type: integer }
+        hasReceipts: { type: boolean }
+    BetaSessionInput:
+      type: object
+      required: [sessionId]
+      properties:
+        sessionId: { type: string, format: uuid }
+    BetaFeedbackUnavailableResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Profile:
+      type: object
+      required: [id, role, name, email, customerId, ecobillId, inviteCode, referralCount, createdAt]
+      properties:
+        id: { type: string }
+        role:
+          type: string
+          enum: [customer, merchant]
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: ["string", "null"] }
+        monthlyBudget: { type: ["number", "null"] }
+        weeklyEmailReport: { type: boolean }
+        treeHealthNotifications: { type: boolean }
+        privacyMode:
+          type: string
+          enum: [private, anonymous-research]
+        customerId: { type: ["string", "null"] }
+        ecobillId: { type: string }
+        inviteCode: { type: string }
+        referralCount: { type: integer }
+        businessName: { type: ["string", "null"] }
+        storeNumber: { type: ["string", "null"] }
+        managerName: { type: ["string", "null"] }
+        merchantCategory: { type: ["string", "null"] }
+        businessEin: { type: ["string", "null"] }
+        businessAddress: { type: ["string", "null"] }
+        salesTaxId: { type: ["string", "null"] }
+        operatorNumber: { type: ["string", "null"] }
+        terminalNumber: { type: ["string", "null"] }
+        transactionNumber: { type: ["string", "null"] }
+        tcCode: { type: ["string", "null"] }
+        taxRate: { type: ["number", "null"] }
+        createdAt: { type: string, format: date-time }
+    ProfileInput:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [customer, merchant]
+        name: { type: string, minLength: 1 }
+        email: { type: string, format: email }
+        phone: { type: string }
+        monthlyBudget: { type: number, minimum: 0 }
+        weeklyEmailReport: { type: boolean }
+        treeHealthNotifications: { type: boolean }
+        privacyMode:
+          type: string
+          enum: [private, anonymous-research]
+        referredByInviteCode: { type: string }
+        businessName: { type: string }
+        storeNumber: { type: string }
+        managerName: { type: string }
+        merchantCategory: { type: string }
+        businessEin: { type: string }
+        businessAddress: { type: string }
+        salesTaxId: { type: string }
+        operatorNumber: { type: string }
+        terminalNumber: { type: string }
+        transactionNumber: { type: string }
+        tcCode: { type: string }
+        taxRate: { type: number, minimum: 0, maximum: 100 }
+    AccountDeletionResult:
+      type: object
+      required: [deleted]
+      properties:
+        deleted: { type: boolean }
+    ReceiptLineItem:
+      type: object
+      required: [name, quantity, price]
+      properties:
+        name: { type: string }
+        quantity: { type: integer, minimum: 1 }
+        price: { type: number, minimum: 0 }
+        barcode: { type: ["string", "null"] }
+        taxClass: { type: ["string", "null"] }
+    Receipt:
+      type: object
+      required: [id, merchantName, merchantAddress, purchasedAt, subtotal, tax, total, items, verificationCode, paperReceiptRequested]
+      properties:
+        id: { type: string }
+        customerId: { type: ["string", "null"] }
+        discoverySource:
+          type: ["string", "null"]
+          enum: [green-map, direct, null]
+        merchantName: { type: string }
+        merchantCategory: { type: ["string", "null"] }
+        merchantAddress: { type: string }
+        purchasedAt: { type: string, format: date-time }
+        subtotal: { type: number }
+        tax: { type: number }
+        total: { type: number }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReceiptLineItem"
+        verificationCode: { type: string }
+        paperSavedGrams: { type: number }
+        paperReceiptRequested: { type: boolean }
+        storeNumber: { type: ["string", "null"] }
+        managerName: { type: ["string", "null"] }
+        merchantPhone: { type: ["string", "null"] }
+        operatorNumber: { type: ["string", "null"] }
+        terminalNumber: { type: ["string", "null"] }
+        transactionNumber: { type: ["string", "null"] }
+        tcCode: { type: ["string", "null"] }
+        taxRate: { type: ["number", "null"] }
+        amountPaid: { type: ["number", "null"] }
+        changeDue: { type: ["number", "null"] }
+        paymentMethod: { type: ["string", "null"] }
+        maskedCard: { type: ["string", "null"] }
+        paymentReferenceNumber: { type: ["string", "null"] }
+        networkId: { type: ["string", "null"] }
+        approvalCode: { type: ["string", "null"] }
+        aid: { type: ["string", "null"] }
+        applicationCryptogram: { type: ["string", "null"] }
+        paymentTerminalId: { type: ["string", "null"] }
+    ReceiptInput:
+      type: object
+      required: [merchantName, merchantAddress, subtotal, tax, total, items]
+      properties:
+        merchantName: { type: string }
+        merchantAddress: { type: string }
+        subtotal: { type: number, minimum: 0 }
+        tax: { type: number, minimum: 0 }
+        total: { type: number, minimum: 0 }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReceiptLineItem"
+        storeNumber: { type: string }
+        managerName: { type: string }
+        merchantPhone: { type: string }
+        operatorNumber: { type: string }
+        terminalNumber: { type: string }
+        transactionNumber: { type: string }
+        tcCode: { type: string }
+        taxRate: { type: number, minimum: 0, maximum: 100 }
+        amountPaid: { type: number, minimum: 0 }
+        changeDue: { type: number, minimum: 0 }
+        paymentMethod: { type: string, description: "Manual record of a payment already completed on the merchant's existing POS; ECOPAPERLESS does not process funds." }
+        maskedCard: { type: string, pattern: "^(?!.*[0-9]{5,})[^\\r\\n]*[0-9]{4}[^\\r\\n]*$" }
+        paymentReferenceNumber: { type: string }
+        networkId: { type: string }
+        approvalCode: { type: string, description: "Approval code manually entered from the merchant's existing POS terminal." }
+        aid: { type: string }
+        applicationCryptogram: { type: string }
+        paymentTerminalId: { type: string }
+        paperReceiptRequested: { type: boolean }
+    ReceiptClaimInput:
+      type: object
+      required: [verificationCode]
+      properties:
+        verificationCode: { type: string, minLength: 1 }
+        discoverySource:
+          type: string
+          enum: [green-map, direct]
+    AnalyticsSummary:
+      type: object
+      required: [dailySpend, monthlySpend, receiptCount, topCategory, categories, monthlyTrend]
+      properties:
+        dailySpend: { type: number }
+        monthlySpend: { type: number }
+        receiptCount: { type: integer }
+        topCategory: { type: string }
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategorySpend"
+        monthlyTrend:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonthlySpend"
+    MonthlySpend:
+      type: object
+      required: [month, amount]
+      properties:
+        month: { type: string }
+        amount: { type: number }
+    CategorySpend:
+      type: object
+      required: [name, amount, percentage]
+      properties:
+        name: { type: string }
+        amount: { type: number }
+        percentage: { type: number }
+    ImpactSummary:
+      type: object
+      required: [receipts, digitalOnlyReceipts, paperSaved, treesSaved, waterSavedLiters, co2Avoided, ecoPoints, treeStage, treeHealth, nextStageAt, currentStreak, longestStreak, checkedInToday, ecoBoostActive, growthMultiplier, nextRewardAt]
+      properties:
+        receipts: { type: integer }
+        digitalOnlyReceipts: { type: integer }
+        paperSaved: { type: number }
+        treesSaved: { type: number }
+        waterSavedLiters: { type: number }
+        co2Avoided: { type: number }
+        ecoPoints: { type: integer }
+        treeStage:
+          type: string
+          enum: [seed, sprout, sapling, tree, forest]
+        treeHealth:
+          type: string
+          enum: [thriving, healthy, resting, wilting]
+        nextStageAt: { type: integer }
+        currentStreak: { type: integer }
+        longestStreak: { type: integer }
+        checkedInToday: { type: boolean }
+        ecoBoostActive: { type: boolean }
+        growthMultiplier: { type: number }
+        nextRewardAt: { type: integer }
+        lastReceiptAt: { type: ["string", "null"], format: date-time }
+    EcoStreakStatus:
+      type: object
+      required: [currentStreak, longestStreak, checkedInToday, ecoBoostActive, growthMultiplier, nextRewardAt]
+      properties:
+        currentStreak: { type: integer }
+        longestStreak: { type: integer }
+        checkedInToday: { type: boolean }
+        ecoBoostActive: { type: boolean }
+        growthMultiplier: { type: number }
+        nextRewardAt: { type: integer }
+    MerchantOverview:
+      type: object
+      required: [todaySales, todayReceiptCount, monthlySales, todayCardSales, todayCashSales, monthlyCardSales, monthlyCashSales, todayCardReceiptCount, monthlyCardReceiptCount, treesSaved, monthlyDigitalReceipts, rollsAvoided, paperCostSaved, printerMaintenanceSaved, totalOperatingCostSaved, receiptsPerRollEstimate, costPerRollEstimate, newCustomersThisMonth, ecoBillAttributedNewCustomers, attributionTrackingActive, digitalReceiptTrend, recentReceipts]
+      properties:
+        todaySales: { type: number }
+        todayReceiptCount: { type: integer }
+        monthlySales: { type: number }
+        todayCardSales: { type: number }
+        todayCashSales: { type: number }
+        monthlyCardSales: { type: number }
+        monthlyCashSales: { type: number }
+        todayCardReceiptCount: { type: integer }
+        monthlyCardReceiptCount: { type: integer }
+        treesSaved: { type: number }
+        monthlyDigitalReceipts: { type: integer }
+        rollsAvoided: { type: number }
+        paperCostSaved: { type: number }
+        printerMaintenanceSaved: { type: number }
+        totalOperatingCostSaved: { type: number }
+        receiptsPerRollEstimate: { type: integer }
+        costPerRollEstimate: { type: number }
+        newCustomersThisMonth: { type: integer }
+        ecoBillAttributedNewCustomers: { type: integer }
+        attributionTrackingActive: { type: boolean }
+        digitalReceiptTrend:
+          type: array
+          items:
+            $ref: "#/components/schemas/MerchantReceiptTrendPoint"
+        productAssociation:
+          oneOf:
+            - $ref: "#/components/schemas/ProductAssociation"
+            - type: "null"
+        recentReceipts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Receipt"
+    MerchantReceiptTrendPoint:
+      type: object
+      required: [day, receipts]
+      properties:
+        day: { type: string }
+        receipts: { type: integer }
+    ProductAssociation:
+      type: object
+      required: [productA, productB, pairReceiptCount, productAReceiptCount, associationRate]
+      properties:
+        productA: { type: string }
+        productB: { type: string }
+        pairReceiptCount: { type: integer }
+        productAReceiptCount: { type: integer }
+        associationRate: { type: number }
+
